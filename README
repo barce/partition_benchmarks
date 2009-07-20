@@ -1,0 +1,7 @@
+to build the tables:
+php build_test.php <rows of data> <no. of partitions>
+
+to test how fast the partitions are as well as having no partitions:
+php testDao.php
+
+
