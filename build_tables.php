@@ -4,6 +4,8 @@ require_once 'db.php';
 require_once 'functions.php';
 require 'Benchmark/Timer.php';
 
+$dbh = bmark_connect('mysql');
+
 $timer = new Benchmark_Timer();
 $timer->start();
 
