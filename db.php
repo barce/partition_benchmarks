@@ -17,7 +17,7 @@ function bmark_connect($database_type = 'mysql') {
 		$pass = $Data['mysqld']['pass'];
 		$host = $Data['mysqld']['host'];
 		$dbname = $Data['mysqld']['dbname'];
-		$dbh = mysql_connect("$host", "$user", "$pass") or die ("Cannot connect!");
+		$dbh = mysql_connect("$host", "$user", "$pass") or die ("mysql Cannot connect!");
 		mysql_select_db($dbname, $dbh) or die ("Cannot select $dbname");
 	}
 	
@@ -35,9 +35,10 @@ function bmark_connect($database_type = 'mysql') {
 
 		// connect to database server
 		$dbh = drizzle_con_add_tcp($drizzle, $host, $port, $user, $pass, $db, 0) 
-		    or die('ERROR: ' . drizzle_error($drizzle));
+		    or die('drizzle ERROR: ' . drizzle_error($drizzle));
 	}
 	
+	// print_r($dbh);
 	return $dbh;
 }
 
