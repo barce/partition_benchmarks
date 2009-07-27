@@ -74,10 +74,35 @@ function bmark_connect($database_type = 'mysql') {
 }
 
 
-function bmark_query($sql, $conn) {
-	
+function bmark_query($sql, $dbh) {
+	print_r($dbh);
+	if (is_a($dbh, "DrizzleCon")) {
+		
+		$result = @drizzle_query($dbh, $sql) or die ('drizzle ERROR: '. drizzle_con_error($dbh));
+		// buffer result set
+	  	drizzle_result_buffer($result)
+	    	or die('ERROR: ' . drizzle_con_error($dbh));
 
-	
+
+		if (drizzle_result_row_count($result)) {
+			while (($row = drizzle_row_next($result))) {
+				$result_set[] = $row;
+			}
+		}
+
+		// free result set
+		drizzle_result_free($result);
+
+
+		// close connection
+		// drizzle_con_close($dbh);
+
+		return $result_set;
+
+		
+	}
+
+	return FALSE;
 	
 	
 }
