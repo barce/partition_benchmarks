@@ -33,6 +33,19 @@ $test->run(new HtmlReporter());
 $test2 = &new TestOfMysqlConnect();
 $test2->run(new HtmlReporter());
 
+class TestOfDrizzleQuery extends UnitTestCase {
 
+	function testQuery() {
+		$dbh = bmark_connect('drizzle');
+		print_r($dbh);
+		$sql = "select * from items order by stuff";
+		$result = bmark_query($sql, $dbh);
+		print_r($result);
+		$this->assertTrue($result);
+	}
+}
+
+$test3 = &new TestOfDrizzleQuery();
+$test3->run(new HtmlReporter());
 
 ?>
