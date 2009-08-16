@@ -4,6 +4,7 @@ require_once 'db.php';
 require_once 'functions.php';
 require 'Benchmark/Timer.php';
 
+// db select is contained with bmark_connect
 $dbh = bmark_connect('mysql');
 
 $timer = new Benchmark_Timer();
@@ -30,17 +31,17 @@ $mid_table   = ceil($parts / 2);
 $s_mid_table = padNumber($mid_table, 2);
 
 $sql = "drop table users_no_partition";
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 
 $sql = "CREATE TABLE users_no_partition ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime)";
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 
 $sql = 'create index login_index on users_no_partition (login)';
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 
 for ($i = 0; $i < $max_rows ; $i++) {
 	$sql = "insert into users_no_partition (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", password('pass$i'))";
-	$result = mysql_query($sql);
+	$result = bmark_query($sql, $dbh);
 }
 
 $timer->setMarker('No_Partition');
@@ -54,33 +55,33 @@ for ($i = 0; $i < $parts; $i++) {
 
 	$table = $prefix . padNumber($i, 2);
 	$sql = "drop table $table";
-	$result = mysql_query($sql);
+	$result = bmark_query($sql, $dbh);
 	
 	$sql = "CREATE TABLE $table ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime)";
-	$result = mysql_query($sql);
+	$result = bmark_query($sql, $dbh);
 	
 	$sql = 'create index login_index on $table (login)';
-	$result = mysql_query($sql);
+	$result = bmark_query($sql, $dbh);
 	
 	for ($j = 0; $j < $perpart; $j++) {
 		$sql = "insert into $table (id, login, pass) values ($k, \"" . md5(rand(1,5000). microtime()) . "user$j\", password('pass$j'))";
-		$result = mysql_query($sql);
+		$result = bmark_query($sql, $dbh);
 		$k++;
 	}
 
 }
 // create & update the meta table used for the php partition
 $sql = "CREATE TABLE meta_table ( id INT NOT NULL primary key AUTO_INCREMENT , tablename varchar(255), iterator int(10), last_user_id int(10))";
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 
 $sql = "insert into meta_table (tablename, iterator) values ('users_00', 4)";
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 
 print "last table for php partition: " . $table . "\n";
 $sql = "update meta_table set tablename = '$table'";
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 $sql = "update meta_table set iterator = '$perpart'";
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 
 $timer->setMarker('Code_Partition');
 echo "Elapsed time between No_Partition and Code_Partition: " .
@@ -88,7 +89,7 @@ echo "Elapsed time between No_Partition and Code_Partition: " .
 
 // create mysql partitioned table
 $sql = "drop table users";
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 $partition_string = '';
 $iter_part = $perpart;
 for ($i = 0; $i <= $parts; $i++) {
@@ -101,14 +102,14 @@ for ($i = 0; $i <= $parts; $i++) {
 }
 $sql = "CREATE TABLE users ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime) PARTITION BY RANGE (id) ( $partition_string )";
 print "partition sql: $sql\n";
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 
 $sql = 'create index login_index on users (login)';
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 
 for ($i = 0; $i < $max_rows; $i++) {
 	$sql = "insert into users (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", password('pass$i'))";
-	$result = mysql_query($sql);
+	$result = bmark_query($sql, $dbh);
 }
 
 $timer->setMarker('MySQL_Partition');
@@ -117,15 +118,15 @@ echo "Elapsed time between No_Partition and Code_Partition: " .
 
 // update the 3 table types
 $sql = "update users_no_partition set login = 'notsolonely21' where id = $mid_id";
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 
 $id_for_partition = $max_rows - ceil($perpart / 3);
 $sql = "update $table set login = 'notsolonely21' where id = " . $id_for_partition;
 print "sql for updating last php partition: $sql\n";
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 
 $sql = "update users set login = 'notsolonely21' where id = $mid_id";
-$result = mysql_query($sql);
+$result = bmark_query($sql, $dbh);
 
 $timer->stop();
 $timer->display();
