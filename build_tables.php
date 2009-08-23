@@ -5,7 +5,7 @@ require_once 'functions.php';
 require 'Benchmark/Timer.php';
 
 // db select is contained with bmark_connect
-$dbh = bmark_connect('mysql');
+$dbh = bmark_connect('drizzle');
 
 $timer = new Benchmark_Timer();
 $timer->start();
