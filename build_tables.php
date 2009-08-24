@@ -30,18 +30,24 @@ $mid_id      = ceil($max_rows / 2);
 $mid_table   = ceil($parts / 2);
 $s_mid_table = padNumber($mid_table, 2);
 
-$sql = "drop table users_no_partition";
+
+$sql = "drop table if exists users_no_partition";
 $result = bmark_query($sql, $dbh);
+print $sql . "\n";
 
 $sql = "CREATE TABLE users_no_partition ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime)";
 $result = bmark_query($sql, $dbh);
+print $sql . "\n";
 
 $sql = 'create index login_index on users_no_partition (login)';
 $result = bmark_query($sql, $dbh);
+print $sql . "\n";
 
 for ($i = 0; $i < $max_rows ; $i++) {
-	$sql = "insert into users_no_partition (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", password('pass$i'))";
+	$sql = "insert into users_no_partition (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", md5('pass$i'))";
 	$result = bmark_query($sql, $dbh);
+	print $sql . "\n";
+	
 }
 
 $timer->setMarker('No_Partition');
@@ -54,7 +60,7 @@ $k = 1;
 for ($i = 0; $i < $parts; $i++) {
 
 	$table = $prefix . padNumber($i, 2);
-	$sql = "drop table $table";
+	$sql = "drop table if exists $table";
 	$result = bmark_query($sql, $dbh);
 	
 	$sql = "CREATE TABLE $table ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime)";
@@ -64,7 +70,7 @@ for ($i = 0; $i < $parts; $i++) {
 	$result = bmark_query($sql, $dbh);
 	
 	for ($j = 0; $j < $perpart; $j++) {
-		$sql = "insert into $table (id, login, pass) values ($k, \"" . md5(rand(1,5000). microtime()) . "user$j\", password('pass$j'))";
+		$sql = "insert into $table (id, login, pass) values ($k, \"" . md5(rand(1,5000). microtime()) . "user$j\", md5('pass$j'))";
 		$result = bmark_query($sql, $dbh);
 		$k++;
 	}
@@ -88,7 +94,7 @@ echo "Elapsed time between No_Partition and Code_Partition: " .
    $timer->timeElapsed('No_Partition', 'Code_Partition') . "\n";
 
 // create mysql partitioned table
-$sql = "drop table users";
+$sql = "drop table if exists users";
 $result = bmark_query($sql, $dbh);
 $partition_string = '';
 $iter_part = $perpart;
@@ -108,7 +114,7 @@ $sql = 'create index login_index on users (login)';
 $result = bmark_query($sql, $dbh);
 
 for ($i = 0; $i < $max_rows; $i++) {
-	$sql = "insert into users (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", password('pass$i'))";
+	$sql = "insert into users (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", md5('pass$i'))";
 	$result = bmark_query($sql, $dbh);
 }
 
