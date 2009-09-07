@@ -112,5 +112,22 @@ function bmark_query($sql, $dbh) {
 	
 }
 
+function bmark_type($db_handler) {
+
+	ob_start();
+	print_r($db_handler);
+	$o_this = ob_get_contents();
+	ob_end_clean();
+
+	if (preg_match("/drizzle.*/i", $o_this)) {
+		return 'drizzle';
+	} 
+	if (preg_match("/mysql.*/i", $o_this)) {
+		return 'mysql';
+	} 
+	return null;
+
+}
+
 
 ?>
