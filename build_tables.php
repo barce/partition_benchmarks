@@ -61,12 +61,14 @@ for ($i = 0; $i < $parts; $i++) {
 
 	$table = $prefix . padNumber($i, 2);
 	$sql = "drop table if exists $table";
+	print "table: $table\n";
+	print $sql . "\n";
 	$result = bmark_query($sql, $dbh);
 	
 	$sql = "CREATE TABLE $table ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime)";
 	$result = bmark_query($sql, $dbh);
 	
-	$sql = 'create index login_index on $table (login)';
+	$sql = "create index login_index on $table (login)";
 	$result = bmark_query($sql, $dbh);
 	
 	for ($j = 0; $j < $perpart; $j++) {
@@ -75,9 +77,14 @@ for ($i = 0; $i < $parts; $i++) {
 		$k++;
 	}
 
+
 }
 // create & update the meta table used for the php partition
-$sql = "CREATE TABLE meta_table ( id INT NOT NULL primary key AUTO_INCREMENT , tablename varchar(255), iterator int(10), last_user_id int(10))";
+// update below
+$sql = "drop table if exists meta_table";
+$result = bmark_query($sql, $dbh);
+
+$sql = "CREATE TABLE meta_table ( id INT NOT NULL primary key AUTO_INCREMENT , tablename varchar(255), iterator int, last_user_id int)";
 $result = bmark_query($sql, $dbh);
 
 $sql = "insert into meta_table (tablename, iterator) values ('users_00', 4)";
