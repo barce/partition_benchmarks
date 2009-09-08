@@ -69,7 +69,7 @@ function bmark_connect($database_type = 'mysql') {
 		}
 	}
 	
-	print_r($dbh);
+	# print_r($dbh);
 	return $dbh;
 }
 

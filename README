@@ -1,7 +1,10 @@
 to build the tables:
-php build_test.php <rows of data> <no. of partitions>
+php build_test.php <rows of data> <no. of partitions> <mysql|drizzle>
 
-to test how fast the partitions are as well as having no partitions:
-php testDao.php
+
+This part below doesn't work yet...
+
+== ignore == to test how fast the partitions are as well as having no partitions
+php testDao.php == ignore == 
 
 
