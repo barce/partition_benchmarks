@@ -80,6 +80,7 @@ function bmark_query($sql, $dbh) {
 	
 	if (is_a($dbh, "DrizzleCon")) {
 
+		$sql = str_replace ("ENGINE=InnoDB DEFAULT CHARSET=utf8", "", $sql);
 		$result = @drizzle_query($dbh, $sql) or
 			die('ERROR: ' . drizzle_con_error($dbh) . "\n");
 		

@@ -40,20 +40,20 @@ $s_mid_table = padNumber($mid_table, 2);
 
 $sql = "drop table if exists users_no_partition";
 $result = bmark_query($sql, $dbh);
-print $sql . "\n";
+# print $sql . "\n";
 
-$sql = "CREATE TABLE users_no_partition ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime)";
+$sql = "CREATE TABLE users_no_partition ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8";
 $result = bmark_query($sql, $dbh);
-print $sql . "\n";
+# print $sql . "\n";
 
 $sql = 'create index login_index on users_no_partition (login)';
 $result = bmark_query($sql, $dbh);
-print $sql . "\n";
+# print $sql . "\n";
 
 for ($i = 0; $i < $max_rows ; $i++) {
 	$sql = "insert into users_no_partition (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", md5('pass$i'))";
 	$result = bmark_query($sql, $dbh);
-	print $sql . "\n";
+	# print $sql . "\n";
 	
 }
 
@@ -68,11 +68,11 @@ for ($i = 0; $i < $parts; $i++) {
 
 	$table = $prefix . padNumber($i, 2);
 	$sql = "drop table if exists $table";
-	print "table: $table\n";
-	print $sql . "\n";
+	# print "table: $table\n";
+	# print $sql . "\n";
 	$result = bmark_query($sql, $dbh);
 	
-	$sql = "CREATE TABLE $table ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime)";
+	$sql = "CREATE TABLE $table ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime)  ENGINE=InnoDB DEFAULT CHARSET=utf8";
 	$result = bmark_query($sql, $dbh);
 	
 	$sql = "create index login_index on $table (login)";
@@ -91,7 +91,7 @@ for ($i = 0; $i < $parts; $i++) {
 $sql = "drop table if exists meta_table";
 $result = bmark_query($sql, $dbh);
 
-$sql = "CREATE TABLE meta_table ( id INT NOT NULL primary key AUTO_INCREMENT , tablename varchar(255), iterator int, last_user_id int)";
+$sql = "CREATE TABLE meta_table ( id INT NOT NULL primary key AUTO_INCREMENT , tablename varchar(255), iterator int, last_user_id int)  ENGINE=InnoDB DEFAULT CHARSET=utf8";
 $result = bmark_query($sql, $dbh);
 
 $sql = "insert into meta_table (tablename, iterator) values ('users_00', 4)";
@@ -123,8 +123,11 @@ for ($i = 0; $i <= $parts; $i++) {
 
 // TODO: native partitions aren't on drizzle
 // start native partition code
-if (strcmp(bmark_type($dbh), 'drizzle')!= 0)  {
-	$sql = "CREATE TABLE users ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime) PARTITION BY RANGE (id) ( $partition_string )";
+// if (strcmp(bmark_type($dbh), 'drizzle')!= 0)  {
+if (0 == 1) {
+	$sql = "CREATE TABLE users ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8 PARTITION BY RANGE (id) ( $partition_string )";
+
+//ENGINE=InnoDB DEFAULT CHARSET=utf8";
 	print "partition sql: $sql\n";
 	$result = bmark_query($sql, $dbh);
 	
