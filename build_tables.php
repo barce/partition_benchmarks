@@ -4,8 +4,17 @@ require_once 'db.php';
 require_once 'functions.php';
 require 'Benchmark/Timer.php';
 
+$max_rows = $_SERVER['argv'][1];
+$parts    = $_SERVER['argv'][2];
+$db_type  = $_SERVER['argv'][3];
+
 // db select is contained with bmark_connect
-$dbh = bmark_connect('drizzle');
+if (strlen ($db_type) <= 0) {
+	$db_type = 'drizzle';
+}
+$dbh = bmark_connect($db_type);
+
+
 
 $timer = new Benchmark_Timer();
 $timer->start();
@@ -21,8 +30,6 @@ $max_rows    = 500;
 $parts       = 5;
 */
 
-$max_rows = $_SERVER['argv'][1];
-$parts    = $_SERVER['argv'][2];
 
 $perpart     = ceil($max_rows / $parts);
 $mid_perpart = ceil($perpart / 2);

@@ -75,19 +75,17 @@ function bmark_connect($database_type = 'mysql') {
 
 
 function bmark_query($sql, $dbh) {
-	print_r($dbh);
+
+	$result_set = null;
+	
 	if (is_a($dbh, "DrizzleCon")) {
-		
+
 		$result = @drizzle_query($dbh, $sql) or
 			die('ERROR: ' . drizzle_con_error($dbh) . "\n");
 		
 		// buffer result set
 	  	drizzle_result_buffer($result)
 	    	or die('ERROR: ' . drizzle_con_error($dbh) . "\n");
-
-		print "bmark_query: ";
-		print_r($result);
-		
 
 		if (drizzle_result_row_count($result)) {
 			while (($row = drizzle_row_next($result))) {
@@ -98,13 +96,27 @@ function bmark_query($sql, $dbh) {
 		// free result set
 		drizzle_result_free($result);
 
-
 		// close connection
 		// drizzle_con_close($dbh);
 
 		return $result_set;
 
 		
+	}
+	
+	if (bmark_type($dbh) === 'mysql') {
+		$result = mysql_query($sql, $dbh) or
+			die('ERROR: ' . mysql_error($dbh));
+		
+		if (preg_match("/select.*/i", $sql)) {
+			if (mysql_num_rows($result) > 0) {
+				while ($row = mysql_fetch_assoc($result)) {
+					$result_set[] = $row;
+				}
+			
+			}
+		}
+		return $result_set;
 	}
 
 	return FALSE;
@@ -122,7 +134,7 @@ function bmark_type($db_handler) {
 	if (preg_match("/drizzle.*/i", $o_this)) {
 		return 'drizzle';
 	} 
-	if (preg_match("/mysql.*/i", $o_this)) {
+	if (preg_match("/Resource.*/i", $o_this)) {
 		return 'mysql';
 	} 
 	return null;
