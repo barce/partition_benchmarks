@@ -159,7 +159,37 @@ if (strcmp(bmark_type($dbh), 'mysql') == 0)  {
 
 if (strcmp(bmark_type($dbh), 'drizzle') == 0)  {
 
+	$sql = "CREATE TABLE users ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
+	print "partition sql: $sql\n";
+	$result = bmark_query($sql, $dbh);
+	
+	$sql = 'create index login_index on users (login)';
+	$result = bmark_query($sql, $dbh);
+	
+	for ($i = 0; $i < $max_rows; $i++) {
+		$sql = "insert into users (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", md5('pass$i'))";
+		$result = bmark_query($sql, $dbh);
+	}
+	
+	$timer->setMarker('Drizzle_Faux_Partition');
+	echo "Elapsed time between No_Partition and Code_Partition: " .
+	   $timer->timeElapsed('Code_Partition', 'Drizzle_Faux_Partition') . "\n";
+	
+	// update the 3 table types
+	$sql = "update users_no_partition set login = 'notsolonely21' where id = $mid_id";
+	$result = bmark_query($sql, $dbh);
+	
+	$id_for_partition = $max_rows - ceil($perpart / 3);
+	$sql = "update $table set login = 'notsolonely21' where id = " . $id_for_partition;
+	print "sql for updating last php partition: $sql\n";
+	$result = bmark_query($sql, $dbh);
+	
+	$sql = "update users set login = 'notsolonely21' where id = $mid_id";
+	$result = bmark_query($sql, $dbh);
+	
+	
+	
 }
 
 // end native partition code
