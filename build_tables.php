@@ -123,8 +123,8 @@ for ($i = 0; $i <= $parts; $i++) {
 
 // TODO: native partitions aren't on drizzle
 // start native partition code
-// if (strcmp(bmark_type($dbh), 'drizzle')!= 0)  {
-if (0 == 1) {
+if (strcmp(bmark_type($dbh), 'mysql') == 0)  {
+// if (0 == 1) {
 	$sql = "CREATE TABLE users ( id INT NOT NULL primary key AUTO_INCREMENT , login varchar(255), email varchar(255), im varchar(255), twitter varchar(255), pass varchar(255), datejoined datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8 PARTITION BY RANGE (id) ( $partition_string )";
 
 //ENGINE=InnoDB DEFAULT CHARSET=utf8";
@@ -156,6 +156,12 @@ if (0 == 1) {
 	$result = bmark_query($sql, $dbh);
 
 }
+
+if (strcmp(bmark_type($dbh), 'drizzle') == 0)  {
+
+
+}
+
 // end native partition code
 $timer->stop();
 $timer->display();

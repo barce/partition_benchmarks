@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
  *
@@ -15,25 +15,59 @@
  *
  */
 
+require_once("spyc.php");
+require_once("bmark_config.php");
+
 class Dao
 {
 
-	var $database_type = ''; # e.g. oracle, mysql?
+	var $database_type = ''; # e.g. oracle, mysql, drizzle?
 	var $user          = '';
 	var $pass          = '';
 	var $host          = '';
+	var $port          = '';
 	var $database      = '';
 	var $connection    = '';
 
 	# create the Dao object. Oracle does not need a database parameter.
-	function __construct($database_type, $user, $pass, $host, $database) 
+	function __construct($database_type, $db_file)
 	{
-		$this->database_type = $database_type;
-		$this->user          = $user;
-		$this->pass          = $pass;
-		$this->host          = $host;
-		$this->database      = $database;
-		$this->connection    = '';
+
+		$Data = Spyc::YAMLLoad(BMARK . 'db.yaml');
+
+		if ($database_type == 'mysql') {
+			$this->database_type = $database_type;
+			$this->user          = $Data['mysqld']['user'];
+			$this->pass          = $Data['mysqld']['pass'];
+			$this->host          = $Data['mysqld']['host'];
+			$this->port          = $Data['mysqld']['port'];
+			$this->database      = $Data['mysqld']['dbname'];
+			$this->connection    = '';
+	
+		}
+
+		if ($database_type == 'drizzle') {
+			$this->database_type = $database_type;
+			$this->user          = $Data['drizzled']['user'];
+			$this->pass          = $Data['drizzled']['pass'];
+			$this->host          = $Data['drizzled']['host'];
+			$this->port          = $Data['drizzled']['port'];
+			$this->database      = $Data['drizzled']['dbname'];
+			$this->connection    = '';
+	
+		}
+		
+		
+		if (strlen($this->port) <= 0) {
+			if (strcmp($this->database_type, "mysql") == 0) {
+				$this->port = '3306';
+			}
+
+			if (strcmp($this->database_type, "drizzle") == 0) {
+				$this->port = '4427';
+			}
+
+		}
 
 	}
 
@@ -54,6 +88,21 @@ class Dao
 			}
 			$this->connection = $connection;
 		}
+
+		if (strcmp($this->database_type, "drizzle") == 0) {
+			$drizzle = drizzle_create();
+			try {
+				$this->connection = drizzle_con_add_tcp($drizzle, $this->host, $this->port, $this->user, $this->pass, $this->database, 0);
+				if ($dbh == FALSE) {
+					throw new Exception('drizzle_con_add_tcp_error');
+				}
+			} catch (Exception $e) {
+				echo "Caught active server error exception:\n", 
+					$e->getMessage(), " ",
+			        $e->getFile(), ": Line ",
+			        $e->getLine(), "\n", $e->getTraceAsString(), "\n";
+			}
+		}
 	}
 
 	function close()
@@ -63,6 +112,14 @@ class Dao
 				die("Could not close connection: " . mysql_error());
 			}
 		}
+		
+		if (strcmp($this->database_type, "drizzle") == 0) {
+			
+			if (!drizzle_con_close($this->connection)) {
+				die("Could not close connection: " . mysql_error());
+			}
+		}
+		return 1;
 	}
 
 
@@ -196,9 +253,9 @@ class Dao
 			print_r($myarray);
 			return $myarray;
 			
-		}
+		} // end of mysql portion
 
-	}
+	} // end of find()
 
 }
 

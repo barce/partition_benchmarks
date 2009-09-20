@@ -1,14 +1,15 @@
 <?php
 
-require_once 'Dao.php';
-require_once 'functions.php';
+require_once ("Dao.php");
+require_once ("functions.php");
 require 'Benchmark/Timer.php';
 
+// phpinfo(); die();
 // use software partition
 $timer = new Benchmark_Timer();
 $timer->start();
 $login = 'notsolonely21';
-$dao = new Dao('mysql', 'cbtester', 'YOUR_PASSWORD', 'localhost', 'cbtester');
+$dao = new Dao('mysql', 'db.yaml');
 $dao->connect();
 $dao->find('users', 'login', $login, '=');
 $dao->close();
@@ -17,7 +18,7 @@ echo "Elapsed time between Start and Test_Code_Partition: " .
 	$timer->timeElapsed('Start', 'Test_Code_Partition') . "\n";
 
 // use backend partition
-$dao2 = new Dao('mysql', 'cbtester', 'YOUR_PASSWORD', 'localhost', 'cbtester');
+$dao2 = new Dao('mysql', 'db.yaml');
 $dao2->connect();
 $dao2->find('users', 'login', $login, '=', 'mysql');
 $dao2->close();
@@ -26,7 +27,7 @@ echo "Elapsed time between Test_Code_Partition and DB_Partition: " .
 	$timer->timeElapsed('Test_Code_Partition', 'DB_Partition') . "\n";
 
 // use no partition
-$dao3 = new Dao('mysql', 'cbtester', 'YOUR_PASSWORD', 'localhost', 'cbtester');
+$dao3 = new Dao('mysql', 'db.yaml');
 $dao3->connect();
 $dao3->find('users', 'login', $login, '=', 'nopart');
 $dao3->close();
