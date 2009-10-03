@@ -134,6 +134,136 @@ class Dao
 	 */
 	function find($table_type, $field, $value, $like = '', $partition_flag = '')
 	{
+
+
+		// drizzle
+		if (strcmp($this->database_type, 'drizzle') == 0)
+		{
+			if (strcmp($like, 'like') == 0) {
+				$like = 'like';
+				$value = "'%$value'";
+			} else {
+				$like = '='; 
+			}
+			
+			if (strcmp($partition_flag, 'nopart') == 0) {
+				$sql = "select * from $table_type" 
+					. "_no_partition where $field $like '$value'";
+	      		$result = @drizzle_query($this->connection, $sql);
+	      		if (!$result) {
+	        		die('Invalid query: ' . drizzle_con_error($this->connection));
+	      		}
+	      		while($row = drizzle_row_next($result))
+	      		{
+	        		$myarray[] = $row; 
+	      		}
+				return $myarray;
+			}
+			
+			
+			if (strcmp($partition_flag, 'drizzle') == 0) {
+	      		$sql = "select * from $table_type where $field $like '$value'";
+				print "partition sql: $sql\n";
+	      		$result = mysql_query($sql, $this->connection);
+	      		if (!$result) {
+	        		die('Invalid query: ' . mysql_error());
+	      		}
+	      		while($row = mysql_fetch_assoc($result))
+	      		{
+	        		$myarray[] = $row; 
+	      		}
+				return $myarray;
+			}
+
+
+			// iterate through the tables using the meta_table
+			$sql = "select SQL_CACHE * from meta_table where tablename like \"" . 
+				$table_type . "%\"";
+
+			print $sql . "\n";
+			$result = mysql_query($sql, $this->connection);
+			if (!$result) {
+				die('Cannnot access meta table: ' . mysql_error());
+			}
+			while($row = mysql_fetch_assoc($result))
+			{
+				$current_table = $row['tablename'];
+				$iterator      = $row['iterator'];
+				$last_user_id  = $row['last_user_id'];
+			}
+			print "current_table: $current_table\n";
+
+			// awesome, we got meta data
+			// we need to now:
+			// go through each table
+			// find the info
+			// return the info
+
+			// get current_table number
+			preg_match('/_[0-9]+/', $current_table, $matches);
+			$bar_number     = $matches[0];
+			preg_match('/[0-9]+/', $bar_number, $matches);
+			$table_number   = $matches[0];
+
+			// get how long the number is b/c of padding issues later
+			$num_length     = strlen($table_number);
+
+			$i_table_number = (int) $table_number;
+
+			// for ($i = 0; $i <= $i_table_number; $i++) {
+
+			$i = 0;
+			$i_sent = 0;
+			$myarray = array();
+			while ($i_sent <= 0) {
+				// search each partition
+				$curr_table = $table_type . "_" . padNumber($i, $num_length);
+				$sql = "select SQL_CACHE * from $curr_table where $field $like '$value'"; 
+				print $sql . "\n";
+				$result = mysql_query($sql, $this->connection);
+				if (!$result) {
+					die('Invalid query: ' . mysql_error());
+				}
+				while($row = mysql_fetch_assoc($result))
+				{
+					$myarray[] = $row;
+				}
+
+				print "count (myarray) : " . count($myarray) . "\n";
+				if (count($myarray) >= 1) {
+					print "count > 1\n";
+					$i_sent = 1;
+				}
+
+				if ($i >= $i_table_number) {
+					print "$i <= $i_table_number\n";
+					$i_sent = 1;
+				}
+				$i++;
+			}
+
+
+/*
+			$sql = "select * from $table where $field $like $value";
+			$result = mysql_query($sql, $this->connection);
+			if (!$result) {
+				die('Invalid query: ' . mysql_error());
+			}
+			while($row = mysql_fetch_assoc($result))
+			{
+			  $array[] = $row; 
+			}
+*/
+
+			print_r($myarray);
+			return $myarray;
+
+
+
+		} // end of drizzle portion
+
+		
+		// mysql
 		if (strcmp($this->database_type, 'mysql') == 0)
 		{
 			if (strcmp($like, 'like') == 0) {
