@@ -4,6 +4,14 @@ require_once 'db.php';
 require_once 'functions.php';
 require 'Benchmark/Timer.php';
 
+$shortopts = "h";
+$options = getopt($shortopts);
+
+if (isset($options['h'])) {
+  print "usage: php build_tables <rows> <partitions> <mysql|drizzle>\n";
+  die();
+}
+
 $max_rows = $_SERVER['argv'][1];
 $parts    = $_SERVER['argv'][2];
 $db_type  = $_SERVER['argv'][3];

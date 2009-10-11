@@ -34,9 +34,9 @@ function bmark_connect($database_type = 'mysql') {
 		
 		// trying db select
 		try {
-			if (!mysql_select_db($dbname, $dbh)) { throw new Exception('mysql_select_db_erorr'); }
+			if (!mysql_select_db($dbname, $dbh)) { throw new Exception('mysql_select_db_eror'); }
 		} catch (Exception $e) {
-	    	echo "Caught active server error exception:\n",  $e->getMessage(), " ",
+	    	echo "($dbname) Caught active server error exception:\n",  $e->getMessage(), " ",
 		        $e->getFile(), ": Line ",
 		        $e->getLine(), "\n", $e->getTraceAsString(), "\n";
 		}
