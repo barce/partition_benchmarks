@@ -177,15 +177,17 @@ class Dao
 
 
 			// iterate through the tables using the meta_table
-			$sql = "select SQL_CACHE * from meta_table where tablename like \"" . 
+			$sql = "select * from meta_table where tablename like \"" . 
 				$table_type . "%\"";
 
 			print $sql . "\n";
-			$result = mysql_query($sql, $this->connection);
+			$result = @mysql_query($sql, $this->connection);
 			if (!$result) {
-				die('Cannnot access meta table: ' . mysql_error());
+				die('Cannnot access meta table: ' . drizzle_con_error($this->connection));
 			}
-			while($row = mysql_fetch_assoc($result))
+      drizzle_result_buffer($result)
+        or die('ERROR: ' . drizzle_con_error($dbh) . "\n");
+			while($row = drizzle_row_next($result))
 			{
 				$current_table = $row['tablename'];
 				$iterator      = $row['iterator'];
@@ -218,7 +220,7 @@ class Dao
 			while ($i_sent <= 0) {
 				// search each partition
 				$curr_table = $table_type . "_" . padNumber($i, $num_length);
-				$sql = "select SQL_CACHE * from $curr_table where $field $like '$value'"; 
+				$sql = "select * from $curr_table where $field $like '$value'"; 
 				print $sql . "\n";
 				$result = mysql_query($sql, $this->connection);
 				if (!$result) {
