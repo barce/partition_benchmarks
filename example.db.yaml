@@ -1,0 +1,14 @@
+mysqld:
+  user: 
+  pass: 
+  host: localhost
+  dbname: cbtester
+
+drizzled:
+  user: 
+  pass:
+  dbname: cbtester
+  host: localhost
+  port: 4427
+
+
