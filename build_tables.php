@@ -8,7 +8,7 @@ $shortopts = "h";
 $options = getopt($shortopts);
 
 if (isset($options['h'])) {
-  print "usage: php build_tables <rows> <partitions> <mysql|drizzle>\n";
+  print "usage: php build_tables.php <rows> <partitions> <mysql|drizzle>\n";
   die();
 }
 

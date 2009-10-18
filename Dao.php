@@ -93,7 +93,7 @@ class Dao
 			$drizzle = drizzle_create();
 			try {
 				$this->connection = drizzle_con_add_tcp($drizzle, $this->host, $this->port, $this->user, $this->pass, $this->database, 0);
-				if ($dbh == FALSE) {
+				if ($this->connection == FALSE) {
 					throw new Exception('drizzle_con_add_tcp_error');
 				}
 			} catch (Exception $e) {
@@ -114,10 +114,12 @@ class Dao
 		}
 		
 		if (strcmp($this->database_type, "drizzle") == 0) {
-			
+			drizzle_con_close($this->connection);
+			/*
 			if (!drizzle_con_close($this->connection)) {
-				die("Could not close connection: " . mysql_error());
+				die("Could not close connection: " . drizzle_con_error($this->connection));
 			}
+			*/
 		}
 		return 1;
 	}
@@ -153,6 +155,9 @@ class Dao
 	      		if (!$result) {
 	        		die('Invalid query: ' . drizzle_con_error($this->connection));
 	      		}
+				drizzle_result_buffer($result)
+			    	or die('ERROR: ' . drizzle_con_error($dbh) . "\n");
+	
 	      		while($row = drizzle_row_next($result))
 	      		{
 	        		$myarray[] = $row; 
@@ -164,11 +169,14 @@ class Dao
 			if (strcmp($partition_flag, 'drizzle') == 0) {
 	      		$sql = "select * from $table_type where $field $like '$value'";
 				print "partition sql: $sql\n";
-	      		$result = mysql_query($sql, $this->connection);
+	      		$result = @drizzle_query($this->connection, $sql);
 	      		if (!$result) {
-	        		die('Invalid query: ' . mysql_error());
+	        		die('Invalid query: ' . drizzle_con_error($this->connection));
 	      		}
-	      		while($row = mysql_fetch_assoc($result))
+				drizzle_result_buffer($result)
+			    	or die('ERROR: ' . drizzle_con_error($dbh) . "\n");
+
+	      		while($row = drizzle_row_next($result))
 	      		{
 	        		$myarray[] = $row; 
 	      		}
@@ -181,17 +189,29 @@ class Dao
 				$table_type . "%\"";
 
 			print $sql . "\n";
-			$result = @mysql_query($sql, $this->connection);
-			if (!$result) {
-				die('Cannnot access meta table: ' . drizzle_con_error($this->connection));
+			try {
+				$result = @drizzle_query($this->connection, $sql);
+				if (!$result) {
+					throw new Exception('meta_table query failed');
+				}
+			} catch (Exception $e) {
+				echo drizzle_con_error($this->connection) . "\n";
+				echo "Caught active server error exception:\n", 
+					$e->getMessage(), " ",
+			        $e->getFile(), ": Line ",
+			        $e->getLine(), "\n", $e->getTraceAsString(), "\n";
 			}
-      drizzle_result_buffer($result)
-        or die('ERROR: ' . drizzle_con_error($dbh) . "\n");
+			
+			drizzle_result_buffer($result)
+		    	or die('ERROR: ' . drizzle_con_error($dbh) . "\n");
+			
+			
 			while($row = drizzle_row_next($result))
 			{
-				$current_table = $row['tablename'];
-				$iterator      = $row['iterator'];
-				$last_user_id  = $row['last_user_id'];
+				print_r($row);
+				$current_table = $row[1];
+				$iterator      = $row[2];
+				$last_user_id  = $row[3];
 			}
 			print "current_table: $current_table\n";
 
@@ -222,11 +242,14 @@ class Dao
 				$curr_table = $table_type . "_" . padNumber($i, $num_length);
 				$sql = "select * from $curr_table where $field $like '$value'"; 
 				print $sql . "\n";
-				$result = mysql_query($sql, $this->connection);
+				$result = @drizzle_query($this->connection, $sql);
 				if (!$result) {
-					die('Invalid query: ' . mysql_error());
+					die('Invalid query: ' . drizzle_con_error($this->connection));
 				}
-				while($row = mysql_fetch_assoc($result))
+				drizzle_result_buffer($result)
+			    	or die('ERROR: ' . drizzle_con_error($dbh) . "\n");
+				
+				while($row = drizzle_row_next($result))
 				{
 					$myarray[] = $row;
 				}
