@@ -2,9 +2,23 @@ to build the tables:
 php build_test.php <rows of data> <no. of partitions> <mysql|drizzle>
 
 
-This part below doesn't work yet...
+to test how fast the partitions are as well as having no partitions
+php testDao.php <mysql|drizzle>
 
-== ignore == to test how fast the partitions are as well as having no partitions
-php testDao.php == ignore == 
+Examples:
+
+Writing partitions to a database:
+php build_tables.php 5000 99 mysql
+php build_tables.php 5000 99 drizzle
+
+On a 2.4 Ghz Intel Core 2 Duo with 2GB of DDR3 RAM, drizzle is much faster
+
+
+Reading from a partition:
+php testDao.php mysql
+php testDao.php drizzle
+
+Drizzle is much slower b/c it doesn't have native partitions yet, but on
+regular selects with an index it is faster than mysql.
 
 
