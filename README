@@ -1,6 +1,9 @@
 to build the tables:
 php build_test.php <rows of data> <no. of partitions> <mysql|drizzle>
-
+ruby cass_build_tables.rb <rows of data>
+  * since cassandra is a 4 dimensional hash store we're not really testing
+    partitions but instead the speed of writes. Currently, in order of
+    speed of no. of writes / second: drizzle, cassandra, mysql
 
 to test how fast the partitions are as well as having no partitions
 php testDao.php <mysql|drizzle>
