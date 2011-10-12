@@ -59,7 +59,7 @@ $result = bmark_query($sql, $dbh);
 # print $sql . "\n";
 
 for ($i = 0; $i < $max_rows ; $i++) {
-	$sql = "insert into users_no_partition (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", md5('pass$i'))";
+	$sql = "insert into users_no_partition (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", \"" . md5("pass$i"). "\")";
 	$result = bmark_query($sql, $dbh);
 	# print $sql . "\n";
 	
@@ -87,7 +87,7 @@ for ($i = 0; $i < $parts; $i++) {
 	$result = bmark_query($sql, $dbh);
 	
 	for ($j = 0; $j < $perpart; $j++) {
-		$sql = "insert into $table (id, login, pass) values ($k, \"" . md5(rand(1,5000). microtime()) . "user$j\", md5('pass$j'))";
+		$sql = "insert into $table (id, login, pass) values ($k, \"" . md5(rand(1,5000). microtime()) . "user$j\", \"" . md5('pass$j') . "\")";
 		$result = bmark_query($sql, $dbh);
 		$k++;
 	}
@@ -143,7 +143,7 @@ if (strcmp(bmark_type($dbh), 'mysql') == 0)  {
 	$result = bmark_query($sql, $dbh);
 	
 	for ($i = 0; $i < $max_rows; $i++) {
-		$sql = "insert into users (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", md5('pass$i'))";
+		$sql = "insert into users (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", \"" . md5("pass$i") ."\")";
 		$result = bmark_query($sql, $dbh);
 	}
 	
@@ -176,7 +176,7 @@ if (strcmp(bmark_type($dbh), 'drizzle') == 0)  {
 	$result = bmark_query($sql, $dbh);
 	
 	for ($i = 0; $i < $max_rows; $i++) {
-		$sql = "insert into users (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", md5('pass$i'))";
+		$sql = "insert into users (login, pass) values (\"" . md5(rand(1,5000). microtime()) . "user$i\", \"" . md5('pass$i') . "\")";
 		$result = bmark_query($sql, $dbh);
 	}
 	
