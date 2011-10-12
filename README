@@ -1,3 +1,5 @@
+edit bmark_config.php with the path to your repo.
+
 to build the tables:
 php build_test.php <rows of data> <no. of partitions> <mysql|drizzle>
 ruby cass_build_tables.rb <rows of data>
